@@ -1,5 +1,5 @@
-import os
-API_KEY = os.getenv("API_KEY")
+import streamlit as st
+API_KEY = st.secrets["API_KEY"]
 BASE_URL = "https://www.shl.com"
 CACHE_FILE = "app/cache/shl_gemini_embeddings.pkl"
 TOP_K = 10
