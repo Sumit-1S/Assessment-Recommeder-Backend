@@ -1,0 +1,25 @@
+# Core libraries
+fastapi
+uvicorn
+pydantic
+numpy
+pandas
+requests
+beautifulsoup4
+regex
+
+# Google Generative AI
+google-genai
+
+# Vector search
+faiss-cpu
+
+# Streamlit frontend
+streamlit
+altair
+
+# Optional but required by some libraries (e.g., Gemini output rendering)
+tabulate
+
+# For running async server during development
+httpx
