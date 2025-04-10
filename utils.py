@@ -83,12 +83,12 @@ def generate_response(query, content):
                     **GIVE OUTPUT IN PROVIDED FORMAT BELOW ONLY**
                     **MAY GIVE COMBINATION OF TEST IF USER SEPCIFIES THE DURATION**
                     **DON'T GENERATE MORE THAN SPECIFIED NUMBER OF SUGGESTIONS**
-
+                    **Don't Recommend any combination of Courses**
                    Return a JSON array like:
                       ```json
                       [
                         {{
-                          "Exam Name": ["Java Platform Enterprise Edition 7 (Java EE 7)"],
+                          "Exam Name": [""],
                           "Duration": ["30 minutes"]
                         }},
                         ...
