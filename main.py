@@ -39,7 +39,7 @@ def load_resources():
     index = build_index(embeddings)
     print(f"✅ Loaded {len(documents)} documents and built FAISS index.")
 
-@app.post("/recommend", response_model=PredictionResponse)
+@app.post("/recommend")
 async def predict_assessments(user_query: UserQuery):
     query = user_query.query
 
@@ -62,41 +62,38 @@ async def predict_assessments(user_query: UserQuery):
     else:
         parsed = raw_response
 
-    # Group similar exams and map with catalog
-    grouped = {}
-    for item in parsed:
-        exam_names = tuple(item["Exam Name"])
-        durations = item["Duration"]
-        grouped.setdefault(exam_names, []).append(durations)
-
     result = []
-    for exam_set, duration_lists in grouped.items():
-        flat_durations = [d for sublist in duration_lists for d in sublist]
+    for item in parsed:
+        exam_names = item["Exam Name"]
+        durations = item["Duration"]
 
-        for i, exam in enumerate(exam_set):
+        for i, exam in enumerate(exam_names):
             match = catalog_df[catalog_df["Assessment Name"].str.lower() == exam.lower()]
             if not match.empty:
                 row = match.iloc[0][RECOMMENDATION_FIELDS].to_dict()
-                result.append(Assessment(
-                    name=row["Assessment Name"],
-                    url=row["URL"],
-                    adaptive_support=row["Adaptive/IRT Support"],
-                    description=exam,
-                    duration=flat_durations[i] if i < len(flat_durations) else "Unknown",
-                    remote_support=row["Remote Testing Support"],
-                    test_type=[row["Test Type"]] if isinstance(row["Test Type"], str) else row["Test Type"]
-                ))
+                print(row)
+                result.append({
+                    "name": row["Assessment Name"],
+                    "url": row["URL"],
+                    "adaptive_support": row["Adaptive/IRT Support"],
+                    "description": exam,
+                    "duration": durations[i] if i < len(durations) else "Unknown",
+                    "remote_support": row["Remote Testing Support"],
+                    "test_type": [row["Test Type"]] if isinstance(row["Test Type"], str) else row["Test Type"]
+                })
             else:
-                result.append(Assessment(
-                    url=BASE_COURSE_URL,
-                    adaptive_support="Unknown",
-                    description=exam,
-                    duration=flat_durations[i] if i < len(flat_durations) else "Unknown",
-                    remote_support="Unknown",
-                    test_type=["Unknown"]
-                ))
+                result.append({
+                    "name": exam,
+                    "url": BASE_COURSE_URL,
+                    "adaptive_support": "Unknown",
+                    "description": exam,
+                    "duration": durations[i] if i < len(durations) else "Unknown",
+                    "remote_support": "Unknown",
+                    "test_type": ["Unknown"]
+                })
 
-    return PredictionResponse(recommended_assessments=result)
+    return JSONResponse(status_code=status.HTTP_200_OK, content={"recommended_assessments": result})
+
 
 # Health Check Endpoint
 @app.get("/health")
